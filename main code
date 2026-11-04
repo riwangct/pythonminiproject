@@ -1,0 +1,325 @@
+
+import tkinter as tk
+from tkinter import messagebox, ttk
+
+# List to store all student records
+student_list = []
+
+# Main Window
+root = tk.Tk()
+root.title("Student Registration Form")
+root.geometry("550x700")
+root.resizable(False, False)
+root.configure(bg="#eaf2f8")
+
+# Heading
+tk.Label(
+    root,
+    text="STUDENT REGISTRATION FORM",
+    font=("Arial", 18, "bold"),
+    bg="#eaf2f8",
+    fg="#154360"
+).pack(pady=20)
+
+# Main Frame
+frame = tk.Frame(root, bg="white", padx=25, pady=20)
+frame.pack(padx=20, pady=10, fill="both")
+
+# Student Name
+tk.Label(frame, text="Student Name:", bg="white").grid(
+    row=0, column=0, sticky="w", pady=10
+)
+
+name_entry = tk.Entry(frame, width=30)
+name_entry.grid(row=0, column=1, pady=10)
+
+# Roll Number
+tk.Label(frame, text="Roll Number:", bg="white").grid(
+    row=1, column=0, sticky="w", pady=10
+)
+
+roll_entry = tk.Entry(frame, width=30)
+roll_entry.grid(row=1, column=1, pady=10)
+
+# Email
+tk.Label(frame, text="Email:", bg="white").grid(
+    row=2, column=0, sticky="w", pady=10
+)
+
+email_entry = tk.Entry(frame, width=30)
+email_entry.grid(row=2, column=1, pady=10)
+
+# Gender
+tk.Label(frame, text="Gender:", bg="white").grid(
+    row=3, column=0, sticky="w", pady=10
+)
+
+gender = tk.StringVar(value="Male")
+
+gender_frame = tk.Frame(frame, bg="white")
+gender_frame.grid(row=3, column=1, sticky="w")
+
+tk.Radiobutton(
+    gender_frame, text="Male",
+    variable=gender, value="Male", bg="white"
+).pack(side="left")
+
+tk.Radiobutton(
+    gender_frame, text="Female",
+    variable=gender, value="Female", bg="white"
+).pack(side="left")
+
+tk.Radiobutton(
+    gender_frame, text="Other",
+    variable=gender, value="Other", bg="white"
+).pack(side="left")
+
+# Course Dropdown
+tk.Label(frame, text="Select Course:", bg="white").grid(
+    row=4, column=0, sticky="w", pady=10
+)
+
+course = tk.StringVar(value="BCA")
+
+tk.OptionMenu(
+    frame, course,
+    "BCA", "BBA", "B.Tech", "MCA", "MBA", "B.Sc"
+).grid(row=4, column=1, sticky="w", pady=10)
+
+# Hobbies
+tk.Label(frame, text="Select Hobbies:", bg="white").grid(
+    row=5, column=0, sticky="nw", pady=10
+)
+
+hobby_frame = tk.Frame(frame, bg="white")
+hobby_frame.grid(row=5, column=1, sticky="w")
+
+reading = tk.BooleanVar()
+music = tk.BooleanVar()
+sports = tk.BooleanVar()
+travelling = tk.BooleanVar()
+
+tk.Checkbutton(
+    hobby_frame, text="Reading",
+    variable=reading, bg="white"
+).pack(anchor="w")
+
+tk.Checkbutton(
+    hobby_frame, text="Music",
+    variable=music, bg="white"
+).pack(anchor="w")
+
+tk.Checkbutton(
+    hobby_frame, text="Sports",
+    variable=sports, bg="white"
+).pack(anchor="w")
+
+tk.Checkbutton(
+    hobby_frame, text="Travelling",
+    variable=travelling, bg="white"
+).pack(anchor="w")
+
+
+# Function to clear the form
+def clear_form():
+
+    name_entry.delete(0, tk.END)
+    roll_entry.delete(0, tk.END)
+    email_entry.delete(0, tk.END)
+
+    gender.set("Male")
+    course.set("BCA")
+
+    reading.set(False)
+    music.set(False)
+    sports.set(False)
+    travelling.set(False)
+
+
+# Function to add student
+def add_student():
+
+    name = name_entry.get().strip()
+    roll = roll_entry.get().strip()
+    email = email_entry.get().strip()
+
+    if not name or not roll or not email:
+        messagebox.showwarning(
+            "Error", "Please fill all the fields!"
+        )
+        return
+
+    if "@" not in email or "." not in email:
+        messagebox.showwarning(
+            "Error", "Enter a valid email address!"
+        )
+        return
+
+    # Check duplicate roll number
+    for student in student_list:
+        if student["Roll Number"] == roll:
+            messagebox.showwarning(
+                "Duplicate",
+                "This roll number is already registered!"
+            )
+            return
+
+    # Collect hobbies
+    hobbies = []
+
+    if reading.get():
+        hobbies.append("Reading")
+
+    if music.get():
+        hobbies.append("Music")
+
+    if sports.get():
+        hobbies.append("Sports")
+
+    if travelling.get():
+        hobbies.append("Travelling")
+
+    if not hobbies:
+        hobbies.append("None")
+
+    # Store student information in dictionary
+    student = {
+        "Name": name,
+        "Roll Number": roll,
+        "Email": email,
+        "Gender": gender.get(),
+        "Course": course.get(),
+        "Hobbies": ", ".join(hobbies)
+    }
+
+    # Add student to list
+    student_list.append(student)
+
+    messagebox.showinfo(
+        "Success",
+        f"Student {name} added successfully!\n"
+        f"Total Students: {len(student_list)}"
+    )
+
+    # Clear form for next student
+    clear_form()
+
+
+# Function to display all students
+def show_all_students():
+
+    if not student_list:
+        messagebox.showwarning(
+            "No Records",
+            "No students have been registered yet!"
+        )
+        return
+
+    # New window
+    display_window = tk.Toplevel(root)
+    display_window.title("All Registered Students")
+    display_window.geometry("1000x400")
+
+    tk.Label(
+        display_window,
+        text="ALL REGISTERED STUDENTS",
+        font=("Arial", 16, "bold")
+    ).pack(pady=15)
+
+    # Table frame
+    table_frame = tk.Frame(display_window)
+    table_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    # Table columns
+    columns = (
+        "Name",
+        "Roll Number",
+        "Email",
+        "Gender",
+        "Course",
+        "Hobbies"
+    )
+
+    tree = ttk.Treeview(
+        table_frame,
+        columns=columns,
+        show="headings"
+    )
+
+    # Column headings
+    for col in columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=140)
+
+    # Scrollbar
+    scrollbar = ttk.Scrollbar(
+        table_frame,
+        orient="vertical",
+        command=tree.yview
+    )
+
+    tree.configure(yscrollcommand=scrollbar.set)
+
+    tree.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    # Insert all student records
+    for student in student_list:
+        tree.insert(
+            "",
+            tk.END,
+            values=tuple(student[col] for col in columns)
+        )
+
+    # Total student count
+    tk.Label(
+        display_window,
+        text=f"Total Registered Students: {len(student_list)}",
+        font=("Arial", 12, "bold")
+    ).pack(pady=10)
+
+
+# Buttons
+button_frame = tk.Frame(root, bg="#eaf2f8")
+button_frame.pack(pady=15)
+
+tk.Button(
+    button_frame,
+    text="ADD STUDENT",
+    command=add_student,
+    bg="#2874a6",
+    fg="white",
+    font=("Arial", 11, "bold"),
+    width=17
+).grid(row=0, column=0, padx=5, pady=5)
+
+tk.Button(
+    button_frame,
+    text="SHOW ALL STUDENTS",
+    command=show_all_students,
+    bg="#239b56",
+    fg="white",
+    font=("Arial", 11, "bold"),
+    width=20
+).grid(row=1, column=0, padx=5, pady=5)
+
+tk.Button(
+    button_frame,
+    text="CLEAR FORM",
+    command=clear_form,
+    bg="#d68910",
+    fg="white",
+    font=("Arial", 11, "bold"),
+    width=17
+).grid(row=2, column=0, padx=5, pady=5)
+
+tk.Label(
+    root,
+    text="Student Registration Management System",
+    bg="#eaf2f8",
+    fg="#555555",
+    font=("Arial", 9)
+).pack(pady=5)
+
+# Run application
+root.mainloop()
